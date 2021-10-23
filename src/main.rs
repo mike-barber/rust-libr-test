@@ -1,13 +1,21 @@
 fn main() -> Result<(), extendr_api::Error> {
     // low-level stuff -- start R
-    low_level::start_r();
-    low_level::test_eval_low_level();
+    // low_level::start_r();
+    // low_level::test_eval_low_level();
+
+    // start R engine
+    extendr_engine::start_r();
+    println!("R started");
 
     // higher-level api -- try some operations
     api::test_basic()?;
     api::test_dataframe()?;
     api::test_function()?;
     api::test_complex_call()?;
+
+    // stop R engine -- never attempt a restart
+    extendr_engine::end_r();
+    println!("R stopped.");
 
     Ok(())
 }

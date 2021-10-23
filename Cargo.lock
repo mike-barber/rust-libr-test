@@ -72,6 +72,7 @@ name = "rust-libr-test"
 version = "0.1.0"
 dependencies = [
  "extendr-api",
+ "extendr-engine",
  "libR-sys",
 ]
 

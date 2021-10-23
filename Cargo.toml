@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 libR-sys = "0.2.2"
 extendr-api = "0.2.0"
+extendr-engine = "0.2.0"
