@@ -8,6 +8,7 @@ fn main() -> Result<(), extendr_api::Error> {
     api::test_dataframe()?;
     api::test_function()?;
     api::test_complex_call()?;
+    api::test_matrix()?;
 
     // stop R engine -- never attempt a restart
     extendr_engine::end_r();
@@ -66,25 +67,44 @@ mod api {
     }
 
     pub fn test_complex_call() -> Result<()> {
-        for _ in 0..100 {
-            let start = Instant::now();
+        const N: u32 = 10;
+        let start = Instant::now();
+        for _ in 0..N {
             R!(
                 testfn <- function(num) {
                     data.frame(a=rnorm(num), b=rnorm(num), c=rnorm(num))
                 }
             )?;
             let res = call!("testfn", 1_000_000)?;
-            let end = Instant::now();
 
             let a = call!("$", &res, "a")?;
 
-            println!(
-                "result is: {:?} len {}, took {:?}",
-                a.rtype(),
-                a.len(),
-                end - start
-            );
+            println!("result is: {:?} len {}", a.rtype(), a.len(),);
         }
+        let per = (Instant::now() - start) / N;
+        println!("time per call: {:?}", per);
+        Ok(())
+    }
+
+    pub fn test_matrix() -> Result<()> {
+        const N: u32 = 10;
+        
+        // create matrix
+        R!(
+            create_mat <- function() {
+                matrix(rnorm(5 * 1000), ncol=5)
+            }
+        )?;
+        let mat = call!("create_mat")?;
+
+        // covariance and check result
+        let start = Instant::now();
+        for _ in 0..N {
+            let cov = call!("cov", &mat)?;
+            println!("result is {}x{} and is matrix: {}", cov.nrows(), cov.ncols(), cov.is_matrix());
+        }
+        let per = (Instant::now() - start) / N;
+        println!("time per call: {:?}", per);
         Ok(())
     }
 }
